@@ -1,5 +1,7 @@
 {
   "extras": [
+    "lazyvim.plugins.extras.editor.fzf",
+    "lazyvim.plugins.extras.editor.leap",
     "lazyvim.plugins.extras.editor.outline"
   ],
   "news": {

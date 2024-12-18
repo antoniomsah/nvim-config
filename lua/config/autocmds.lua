@@ -1,46 +1,43 @@
--- Add snippets to luasnip.
-local ls = require("luasnip")
+-- Command to copy files from competitive programming library
 
-local snip = ls.snippet
-local func = ls.function_node
+local function copy_files_from_maratona()
+  -- Hardcoded path to the competitive programming files
+  local source_dir = vim.fn.expand("~/Desktop/maratona/competitive-programming/lib")
 
-ls.setup({
-  history = true,
-  update_events = "TextChanged,TextChangedI",
-  delete_check_events = "TextChanged",
-  store_selection_keys = "<Tab>",
-})
+  -- Use fzf-lua to select files
+  require("fzf-lua").files({
+    cwd = source_dir,
+    multi = true,
+    actions = {
+      ["enter"] = function(selected)
+        for _, file in ipairs(selected) do
+          file = file:match("[a-zA-Z0-9].*$") or file
 
-local load_file = function(file_name)
-  local fn = function()
-    local full_file_name = vim.env.HOME .. "/.config/nvim/templates/" .. file_name
-    local ret = {}
-    for line in io.lines(full_file_name) do
-      table.insert(ret, line)
-    end
-    return ret
-  end
-  return fn
-end
+          -- Construct full source path
+          local source_path = source_dir .. "/" .. file
 
-local template_snippet = function(file_type, trigger, file_name)
-  ls.add_snippets(file_type, {
-    snip({
-      trig = trigger,
-    }, {
-      func(load_file(file_name), {}),
-    }),
+          -- Read file contents
+          local contents = vim.fn.readfile(source_path)
+
+          -- Get cursor position
+          local cursor_pos = vim.api.nvim_win_get_cursor(0)
+          local current_line = cursor_pos[1]
+
+          -- Insert contents at cursor position
+          vim.api.nvim_buf_set_lines(0, current_line - 1, current_line - 1, false, contents)
+        end
+      end,
+    },
   })
 end
 
-template_snippet("cpp", "template", "template.cpp")
-template_snippet("cpp", "binary_search", "binary_search.cpp")
-template_snippet("cpp", "segtree", "structures/segtree.cpp")
-template_snippet("cpp", "segit", "structures/segit.cpp")
-template_snippet("cpp", "mint", "math/mint.cpp")
+-- Create a command to easily invoke the file copying from Maratona directory
+vim.api.nvim_create_user_command("MaratonaCopyFiles", copy_files_from_maratona, {})
+
+-- Optional: Add a keymapping for quick access
+vim.keymap.set("n", "<leader>lib", ":MaratonaCopyFiles<CR>", { noremap = true, silent = true })
 
 -- Autoformat settings
-
 local set_autoformat = function(pattern, want_autoformat)
   vim.api.nvim_create_autocmd({ "FileType" }, {
     pattern = pattern,

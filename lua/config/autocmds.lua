@@ -2,6 +2,7 @@
 
 local function copy_files_from_maratona()
   -- Hardcoded path to the competitive programming files
+  -- Change this path to match the desired library
   local source_dir = vim.fn.expand("~/Desktop/maratona/competitive-programming/lib")
 
   -- Use fzf-lua to select files
